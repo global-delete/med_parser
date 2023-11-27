@@ -6,7 +6,7 @@ import csv
 from bs4 import BeautifulSoup
 
 fieldnames_analysis: list = ['Код', 'Группа', 'Наименование', 'Срок', 'Стоимость услуги', 'Наименование лаборатории', 'Дата']
-fieldnames_centers: list = ['Город', 'Адрес', 'Контактные номера', 'Время работы', 'Станция метро']
+fieldnames_centers: list = ['Город', 'Адрес', 'Контактные номера', 'Часы работы', 'Станция метро']
 
 class Parser:
     __url: str = "https://www.cmd-online.ru"
@@ -47,10 +47,6 @@ class Parser:
                     "dl", class_="analyze-item__spec"
                 )[0].text.replace("Код:", "").strip()
 
-                data["Срок"] = analyze.find_all(
-                    "dl", class_="analyze-item__spec"
-                )[1].text.replace("Срок:", "").strip()
-
                 data["Стоимость услуги"] = analyze.find(
                     "div", class_="analyze-item__price"
                 ).text.replace("Цена:", "").strip()
@@ -90,7 +86,7 @@ class Parser:
             'Город': soup.find('li', class_='header__links-link header__links-link--city').text.strip(),
             'Адрес': soup.find('address', class_='med-office__address').text.strip(),
             'Контактные номера': '; '.join([i.find('a').text.strip() for i in soup.find_all('ul', class_='phones')]),
-            'Время работы': '; '.join(f'{i.get("data-day")}: {i.text.strip()}' for i in soup.find('table', class_='custom-table').find('tbody').find('tr').find_all('td') if i.get('data-day')),
+            'Часы работы': '; '.join(f'{i.get("data-day")}: {i.text.strip()}' for i in soup.find('table', class_='custom-table').find('tbody').find('tr').find_all('td') if i.get('data-day')),
             'Станция метро': ''
         }
 
