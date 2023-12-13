@@ -73,7 +73,7 @@ def analysis_data():
         for title_item, price_item in zip(soup.find_all('div', 'analyzes-item__title'), soup.find_all('div', 'analyzes-item__total--sum')):
             title = title_item.get_text(strip=True)
             price = price_item.get_text(strip=True)
-            services.append(Service(Category(soup.find('div', 'title-block title-block--img').get_text(strip=True)), title, price))
+            services.append(Service(Category(''), title, price))
 
     data = [
         [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())), services[i].title, services[i].category.title,
@@ -86,4 +86,3 @@ def analysis_data():
 if __name__ == '__main__':
     address_data()
     analysis_data()
-
