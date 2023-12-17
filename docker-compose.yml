@@ -7,7 +7,7 @@ services:
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     ports:
-      - "5432:5432"
+      - "6543:5432"
 
   webserver:
     image: puckel/docker-airflow:1.10.1
