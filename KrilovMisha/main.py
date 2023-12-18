@@ -2,11 +2,13 @@ import json
 import requests
 import datetime
 import csv
+import asyncio  
 
 from bs4 import BeautifulSoup
 from typing import List
+from KrilovMisha.database import db
 
-fieldnames_analysis: List = ['Код', 'Группа', 'Наименование', 'Стоимость услуги', 'Наименование лаборатории', 'Дата']
+fieldnames_analysis: List = ['Код', 'Группа', 'Наименование', 'Стоимость_услуги', 'Наименование_лаборатории', 'Дата']
 fieldnames_centers: List = ['Город', 'Адрес', 'Контактные номера', 'Часы работы', 'Станция метро']
 
 class Parser:
@@ -28,7 +30,7 @@ class Parser:
         self.date: datetime = datetime.datetime.now()
 
     def get_soup(self, url: str) -> BeautifulSoup:            
-        return BeautifulSoup(self.session.get(url).text, "lxml")
+        return BeautifulSoup(self.session.get(url, timeout=1000).text, "lxml")
 
     def parse_page(self, url: str) -> List[dict]:
         page_data = []
@@ -48,11 +50,11 @@ class Parser:
                     "dl", class_="analyze-item__spec"
                 )[0].text.replace("Код:", "").strip()
 
-                data["Стоимость услуги"] = analyze.find(
+                data["Стоимость_услуги"] = analyze.find(
                     "div", class_="analyze-item__price"
                 ).text.replace("Цена:", "").strip()
 
-                data['Наименование лаборатории'] = "CMD"
+                data['Наименование_лаборатории'] = "CMD"
                 data['Дата'] = "{}.{}.{}".format(self.date.day, self.date.month, self.date.year)
 
                 page_data.append(data)
@@ -99,18 +101,26 @@ class Parser:
         }
 
         # Сохраняем данные адресов
-        with open(self.__path_data_centers, 'w', encoding='cp1251', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=fieldnames_centers)
-            writer.writeheader()
-            for city in self.data:
-                writer.writerows(self.data[city]['Адреса офисов'])
+        # with open(self.__path_data_centers, 'w', encoding='cp1251', newline='') as file:
+        #     writer = csv.DictWriter(file, fieldnames=fieldnames_centers)
+        #     writer.writeheader()
+        #     for city in self.data:
+        #         writer.writerows(self.data[city]['Адреса офисов'])
 
-        # # Сохраняем данные анализов
-        with open(self.__path_data_analysis, 'w', encoding='cp1251', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=fieldnames_analysis)
-            writer.writeheader()
-            for city in self.data:
-                writer.writerows(self.data[city]['Анализы'])
+        # # # Сохраняем данные анализов
+        # with open(self.__path_data_analysis, 'w', encoding='cp1251', newline='') as file:
+        #     writer = csv.DictWriter(file, fieldnames=fieldnames_analysis)
+        #     writer.writeheader()
+        #     for city in self.data:
+        #         writer.writerows(self.data[city]['Анализы'])
 
-Parser().parse()
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(self.save_to_db())
 
+        print('Done!')
+
+    async def save_to_db(self) -> None:
+        for i in self.data[self.__city]['Анализы']:
+            await db._insert(table='analyzes', **i)
+
+# Parser().parse()
