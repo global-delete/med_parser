@@ -4,9 +4,10 @@ import datetime
 import csv
 
 from bs4 import BeautifulSoup
+from typing import List
 
-fieldnames_analysis: list = ['Код', 'Группа', 'Наименование', 'Стоимость услуги', 'Наименование лаборатории', 'Дата']
-fieldnames_centers: list = ['Город', 'Адрес', 'Контактные номера', 'Часы работы', 'Станция метро']
+fieldnames_analysis: List = ['Код', 'Группа', 'Наименование', 'Стоимость услуги', 'Наименование лаборатории', 'Дата']
+fieldnames_centers: List = ['Город', 'Адрес', 'Контактные номера', 'Часы работы', 'Станция метро']
 
 class Parser:
     __url: str = "https://www.cmd-online.ru"
@@ -29,7 +30,7 @@ class Parser:
     def get_soup(self, url: str) -> BeautifulSoup:            
         return BeautifulSoup(self.session.get(url).text, "lxml")
 
-    def parse_page(self, url: str) -> list[dict]:
+    def parse_page(self, url: str) -> List[dict]:
         page_data = []
 
         soup = self.get_soup(url)
@@ -58,7 +59,7 @@ class Parser:
 
         return page_data
 
-    def parse_city_analysis(self, city) -> list:
+    def parse_city_analysis(self, city) -> List:
         analysis = []
 
         soup = self.get_soup(f"{self.__url}/analizy-i-tseny/katalog-analizov/{city}/?all_group=&set_filter=y")
@@ -90,7 +91,7 @@ class Parser:
             'Станция метро': ''
         }
 
-    def parse(self) -> list:
+    def parse(self) -> List:
 
         self.data[self.__city] = {
             'Анализы': self.parse_city_analysis(self.__city),

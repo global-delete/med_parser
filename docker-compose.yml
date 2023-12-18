@@ -1,22 +1,23 @@
 version: '3'
 services:
-  postgresql:
-    image: postgres
+  postgres:
+    image: postgres:9.6
     environment:
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
   webserver:
-    network_mode: "host"
+    #network_mode: "host"
     image: puckel/docker-airflow:1.10.1
     build:
       context: https://github.com/puckel/docker-airflow.git#1.10.1
       dockerfile: Dockerfile
       args:
+        AIRFLOW_DEPS: gcp_api,s3
         PYTHON_DEPS: sqlalchemy==1.2.0
     restart: always
     depends_on:
-      - postgresql
+      - postgres
     environment:
       - LOAD_EX=n
       - EXECUTOR=Local
@@ -37,8 +38,6 @@ services:
     command: webserver
     healthcheck:
       test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-      interval: 30s
-      timeout: 30s
+      interval: 5s
+      timeout: 5s
       retries: 3
-
-          
