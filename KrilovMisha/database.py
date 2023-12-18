@@ -31,28 +31,6 @@ class Connection:
             port=cnfg["port"],
         )
 
-
-class Analysis:
-    def __init__(
-        self,
-        Код,
-        Группа,
-        Наименование,
-        Стоимость_услуги,
-        Наименование_лаборатории,
-        Дата,
-    ) -> None:
-        self.Код = Код
-        self.Группа = Группа
-        self.Наименование = Наименование
-        self.Стоимость_услуги = Стоимость_услуги
-        self.Наименование_лаборатории = Наименование_лаборатории
-        self.Дата = Дата
-
-    def __str__(self) -> str:
-        return str(" ".join([f"{i}:{self.__dict__[i]}" for i in self.__dict__]))
-
-
 class DataBase:
     __tables: List[str] = ["analyzes", "addresses"]
     __schemes: List[str] = ['STG', 'DDS']
@@ -139,8 +117,6 @@ class DataBase:
 
     async def create_tables(self) -> None:
         tables = [(i[1], i[2]) async for i in self.check_tables() if not i[0]]
-
-        # print(tables)
 
         connection: asyncpg.connection.Connection = await Connection._connect()
 

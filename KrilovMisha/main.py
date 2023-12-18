@@ -9,12 +9,12 @@ from typing import List
 from KrilovMisha.database import db
 
 fieldnames_analysis: List = ['Код', 'Группа', 'Наименование', 'Стоимость_услуги', 'Наименование_лаборатории', 'Дата']
-fieldnames_centers: List = ['Город', 'Адрес', 'Контактные номера', 'Часы работы', 'Станция метро']
+fieldnames_centers: List = ['Город', 'Адрес', 'Контактные_номера', 'Часы_работы', 'Станция_метро', 'Наименование_клиники']
 
 class Parser:
     __url: str = "https://www.cmd-online.ru"
-    __path_data_analysis = r".\data\analysis.csv"
-    __path_data_centers = r".\data\centers.csv"
+    __path_data_analysis = r".\KrilovMisha\data\analysis.csv"
+    __path_data_centers = r".\KrilovMisha\data\centers.csv"
     __city = 'sankt-peterburg'
 
     __headers: dict = {
@@ -88,9 +88,10 @@ class Parser:
         return {
             'Город': soup.find('li', class_='header__links-link header__links-link--city').text.strip(),
             'Адрес': soup.find('address', class_='med-office__address').text.strip(),
-            'Контактные номера': '; '.join([i.find('a').text.strip() for i in soup.find_all('ul', class_='phones')]),
-            'Часы работы': '; '.join(f'{i.get("data-day")}: {i.text.strip()}' for i in soup.find('table', class_='custom-table').find('tbody').find('tr').find_all('td') if i.get('data-day')),
-            'Станция метро': ''
+            'Контактные_номера': '; '.join([i.find('a').text.strip() for i in soup.find_all('ul', class_='phones')]),
+            'Часы_работы': '; '.join(f'{i.get("data-day")}: {i.text.strip()}' for i in soup.find('table', class_='custom-table').find('tbody').find('tr').find_all('td') if i.get('data-day')),
+            'Станция_метро': '',
+            'Наименование_клиники': '',
         }
 
     def parse(self) -> List:
@@ -101,18 +102,18 @@ class Parser:
         }
 
         # Сохраняем данные адресов
-        # with open(self.__path_data_centers, 'w', encoding='cp1251', newline='') as file:
-        #     writer = csv.DictWriter(file, fieldnames=fieldnames_centers)
-        #     writer.writeheader()
-        #     for city in self.data:
-        #         writer.writerows(self.data[city]['Адреса офисов'])
+        with open(self.__path_data_centers, 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames_centers)
+            writer.writeheader()
+            for city in self.data:
+                writer.writerows(self.data[city]['Адреса офисов'])
 
-        # # # Сохраняем данные анализов
-        # with open(self.__path_data_analysis, 'w', encoding='cp1251', newline='') as file:
-        #     writer = csv.DictWriter(file, fieldnames=fieldnames_analysis)
-        #     writer.writeheader()
-        #     for city in self.data:
-        #         writer.writerows(self.data[city]['Анализы'])
+        # Сохраняем данные анализов
+        with open(self.__path_data_analysis, 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames_analysis)
+            writer.writeheader()
+            for city in self.data:
+                writer.writerows(self.data[city]['Анализы'])
 
         loop = asyncio.get_event_loop()
         result = loop.run_until_complete(self.save_to_db())
@@ -121,6 +122,9 @@ class Parser:
 
     async def save_to_db(self) -> None:
         for i in self.data[self.__city]['Анализы']:
-            await db._insert(table='analyzes', **i)
+            await db._insert(table='analyzes', schema='stg', **i)
 
-# Parser().parse()
+        for i in self.data[self.__city]['Адреса офисов']:
+            await db._insert(table='addresses', schema='stg', **i)
+
+Parser().parse()
