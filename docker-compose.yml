@@ -15,4 +15,4 @@ services:
       - .:/app
       - ./requirements.txt:/requirements.txt
     working_dir: /app
-    command: sh -c "pip3.8 install -r requirements.txt && apt-get update && apt-get install -y wget && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && apt-get install -y ./google-chrome-stable_current_amd64.deb && python3.8 main.py"
+    command: sh -c "pip3.8 install -r requirements.txt && apt-get update && apt-get install -y wget && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && apt-get install -y ./google-chrome-stable_current_amd64.deb && rm google-chrome-stable_current_amd64.deb && python3.8 main.py"
