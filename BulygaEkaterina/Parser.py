@@ -69,11 +69,11 @@ def analysis_data():
     return services
 
     #data = [
-        [services[i].date, services[i].title, services[i].category.title,
-         services[i].code, services[i].price, services[i].laboratory] for i in range(len(services))]
+    #    [services[i].date, services[i].title, services[i].category.title,
+    #     services[i].code, services[i].price, services[i].laboratory] for i in range(len(services))]
 
     #df = pd.DataFrame(data,
-                      columns=['Дата', 'Наименование', 'Группа', 'Код', 'Стоимость услуги', 'Наименование лаборатории'])
+    #                  columns=['Дата', 'Наименование', 'Группа', 'Код', 'Стоимость услуги', 'Наименование лаборатории'])
     #df.to_csv('Анализы.csv', encoding='utf8')
 
 
