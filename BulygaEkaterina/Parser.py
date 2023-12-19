@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests as req
 import pandas as pd
 import time
+from KrilovMisha.database import db
 
 
 class Address:
@@ -65,14 +66,15 @@ def analysis_data():
     soup = BeautifulSoup(resp.text, 'lxml')
     urls = url_finder('a', 'nav-link', soup)
     services = services_finder(urls)
+    return services
 
-    data = [
+    #data = [
         [services[i].date, services[i].title, services[i].category.title,
          services[i].code, services[i].price, services[i].laboratory] for i in range(len(services))]
 
-    df = pd.DataFrame(data,
+    #df = pd.DataFrame(data,
                       columns=['Дата', 'Наименование', 'Группа', 'Код', 'Стоимость услуги', 'Наименование лаборатории'])
-    df.to_csv('Анализы.csv', encoding='utf8')
+    #df.to_csv('Анализы.csv', encoding='utf8')
 
 
 def address_data():
@@ -88,13 +90,28 @@ def address_data():
 
     data = [[addresses[i].city, addresses[i].address, addresses[i].worktime, addresses[i].phone, addresses[i].metro]
             for i in range(len(addresses))]
-    df = pd.DataFrame(data=data, columns=['Город', 'Адрес', 'Часы работы', 'Контактный телефон', 'Станция метро'])
-    df.to_csv('Адреса.csv', encoding='utf8')
+    #df = pd.DataFrame(data=data, columns=['Город', 'Адрес', 'Часы работы', 'Контактный телефон', 'Станция метро'])
+    #df.to_csv('Адреса.csv', encoding='utf8')
+    return data
+
+
+async def add_to_db(obj, table_name):
+    # Рассмотрим добавление данных в таблицу анализов схемы dds
+    await db._insert(
+        table=table_name,  # Тут название таблицы (analyzes/addresses)
+        schema='stg',  # Указываем схему
+        Код=obj.code,  # Здесь код анализа
+        Группа=obj.category,  # Группа, к которой относится наши анализы
+        Наименование=obj.title,  # Наименование нашего анализа
+        Стоимость_услуги=obj.price,  # Стоимость услуги
+        Наименование_лаборатории=obj.laboratory,  # Наименование лаборатории
+        Дата=obj.date,  # Дата сбора анализа
+    )
 
 
 if __name__ == '__main__':
-    start = time.time()
-    analysis_data()
+    services = analysis_data()
     address_data()
-    stop = time.time()
-    print(time.strftime('%M:%S', time.localtime(stop - start)))
+    loop = asyncio.get_event_loop()
+    for service in services:
+        loop.run_until_complete(add_to_db(service, 'analyzes'))
