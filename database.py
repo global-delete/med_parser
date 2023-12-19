@@ -5,11 +5,11 @@ from pandas import DataFrame
 from typing import Generator, Coroutine, Any, List
 
 cnfg = {
-    "user": "airflow",
-    "password": "airflow",
-    "database": "airflow",
-    "host": "localhost",
-    "port": "6543",
+    "user": "postgres",
+    "password": "postgres",
+    "database": "postgres",
+    "host": "postgres",
+    "port": "5432",
 }
 
 
@@ -29,6 +29,7 @@ class Connection:
             database=cnfg["database"],
             host=cnfg["host"],
             port=cnfg["port"],
+            timeout=600
         )
 
 class DataBase:

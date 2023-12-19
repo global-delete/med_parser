@@ -28,8 +28,8 @@ fieldnames_centers: List = [
 
 class Parser:
     __url: str = "https://www.cmd-online.ru"
-    __path_data_analysis = r".\KrilovMisha\data\analysis.csv"
-    __path_data_centers = r".\KrilovMisha\data\centers.csv"
+    __path_data_analysis = "/KrilovMisha/data/analysis.csv"
+    __path_data_centers = "/KrilovMisha/data/centers.csv"
     __city = "sankt-peterburg"
 
     __headers: dict = {
@@ -133,7 +133,7 @@ class Parser:
             "Наименование_клиники": "",
         }
 
-    def parse(self) -> List:
+    async def parse(self) -> List:
         self.data[self.__city] = {
             "Анализы": self.parse_city_analysis(self.__city),
             "Адреса офисов": self.parse_city_centers(self.__city),
@@ -153,8 +153,7 @@ class Parser:
             for city in self.data:
                 writer.writerows(self.data[city]["Анализы"])
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.save_to_db())
+        await self.save_to_db()
 
         print("Done!")
 
@@ -166,8 +165,5 @@ class Parser:
             await db._insert(table="addresses", schema="stg", **i)
 
 
-if __name__ == "__main__":
-    Parser().parse()
 
-else:
-    parser = Parser()
+parser = Parser()
