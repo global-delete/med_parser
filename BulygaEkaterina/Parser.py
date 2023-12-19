@@ -2,17 +2,17 @@ from bs4 import BeautifulSoup
 import requests as req
 import pandas as pd
 import time
-import asyncio
 from database import db
 
 
 class Address:
-    def __init__(self, city, address, worktime, phone, metro):
+    def __init__(self, city, address, worktime, phone, metro, laboratory='АО "ЛабКвест"'):
         self.city = city
         self.address = address
         self.worktime = list_to_str(worktime)
         self.phone = phone
         self.metro = metro
+        self.laboratory = laboratory
 
 
 class Category:
@@ -69,13 +69,13 @@ def analysis_data():
     services = services_finder(urls)
     return services
 
-    #data = [
+    # data = [
     #    [services[i].date, services[i].title, services[i].category.title,
     #     services[i].code, services[i].price, services[i].laboratory] for i in range(len(services))]
 
-    #df = pd.DataFrame(data,
+    # df = pd.DataFrame(data,
     #                  columns=['Дата', 'Наименование', 'Группа', 'Код', 'Стоимость услуги', 'Наименование лаборатории'])
-    #df.to_csv('Анализы.csv', encoding='utf8')
+    # df.to_csv('Анализы.csv', encoding='utf8')
 
 
 def address_data():
@@ -89,34 +89,45 @@ def address_data():
         addresses.append(Address(title[0], ', '.join(title[1:]), worktime,
                                  soup.find('span', 'msk_call_phone_1').get_text(strip=True).replace(' ', ''), ''))
 
-    data = [[addresses[i].city, addresses[i].address, addresses[i].worktime, addresses[i].phone, addresses[i].metro]
-            for i in range(len(addresses))]
-    #df = pd.DataFrame(data=data, columns=['Город', 'Адрес', 'Часы работы', 'Контактный телефон', 'Станция метро'])
-    #df.to_csv('Адреса.csv', encoding='utf8')
-    return data
+    # data = [[addresses[i].city, addresses[i].address, addresses[i].worktime, addresses[i].phone, addresses[i].metro]
+    #        for i in range(len(addresses))]
+    # df = pd.DataFrame(data=data, columns=['Город', 'Адрес', 'Часы работы', 'Контактный телефон', 'Станция метро'])
+    # df.to_csv('Адреса.csv', encoding='utf8')
+    return addresses
 
 
 async def add_to_db(obj, table_name):
-    # Рассмотрим добавление данных в таблицу анализов схемы dds
-    await db._insert(
-        table=table_name,  # Тут название таблицы (analyzes/addresses)
-        schema='stg',  # Указываем схему
-        Код=obj.code,  # Здесь код анализа
-        Группа=obj.category.title,  # Группа, к которой относится наши анализы
-        Наименование=obj.title,  # Наименование нашего анализа
-        Стоимость_услуги=obj.price,  # Стоимость услуги
-        Наименование_лаборатории=obj.laboratory,  # Наименование лаборатории
-        Дата=obj.date,  # Дата сбора анализа
-    )
+    if isinstance(obj, Service):
+        # Рассмотрим добавление данных в таблицу анализов схемы dds
+        await db._insert(
+            table=table_name,  # Тут название таблицы (analyzes/addresses)
+            schema='stg',  # Указываем схему
+            Код=obj.code,  # Здесь код анализа
+            Группа=obj.category.title,  # Группа, к которой относится наши анализы
+            Наименование=obj.title,  # Наименование нашего анализа
+            Стоимость_услуги=obj.price,  # Стоимость услуги
+            Наименование_лаборатории=obj.laboratory,  # Наименование лаборатории
+            Дата=obj.date,  # Дата сбора анализа
+        )
+    elif isinstance(obj, Address):
+        await db._insert(
+            table=table_name,  # Тут название таблицы (analyzes/addresses)
+            schema='stg',  # Указываем схему
+            Город=obj.city,
+            Адрес=obj.address,
+            Контактные_номера=obj.phone,
+            Часы_работы=obj.worktime,
+            Станция_метро=obj.metro,
+            Наименование_клиники=obj.laboratory
+        )
 
 
 async def parse():
     services = analysis_data()
-    # address_data()
+    addresses = address_data()
 
     for service in services:
         await add_to_db(service, 'analyzes')
 
-    
-    
-        
+    for address in addresses:
+        await add_to_db(address, 'addresses')

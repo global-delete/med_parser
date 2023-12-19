@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from database import db
 
 categories = [
     "check-up-obsledovanie-organizma/",
@@ -104,15 +105,15 @@ def get_services():
             subcategories.append(cat_names[i])
 
             if source.find(
-                "div",
-                "complex-detail__header-pic-decor complex-detail__header-pic-decor--white",
+                    "div",
+                    "complex-detail__header-pic-decor complex-detail__header-pic-decor--white",
             ):
                 ids.append("")
             else:
                 if (
-                    "Синонимы" in source.find("p", {"class": "paragraph2"}).text
-                    or "Оставьте" in source.find("p", {"class": "paragraph2"}).text
-                    or "Цена" in source.find("p", {"class": "paragraph2"}).text
+                        "Синонимы" in source.find("p", {"class": "paragraph2"}).text
+                        or "Оставьте" in source.find("p", {"class": "paragraph2"}).text
+                        or "Цена" in source.find("p", {"class": "paragraph2"}).text
                 ):
                     ids.append("")
                 else:
@@ -135,20 +136,21 @@ def get_services():
         ]
         for i, title in enumerate(titles)
     ]
+    return data
 
-    df = pandas.DataFrame(
-        data,
-        columns=[
-            "Дата",
-            "Наименование",
-            "Группа",
-            "Код",
-            "Стоимость услуги",
-            "Наименование лаборатории",
-        ],
-    )
+    # df = pandas.DataFrame(
+    #    data,
+    #    columns=[
+    #        "Дата",
+    #        "Наименование",
+    #        "Группа",
+    #        "Код",
+    #        "Стоимость услуги",
+    #        "Наименование лаборатории",
+    #    ],
+    # )
 
-    df.to_csv("Анализы.csv")
+    # df.to_csv("Анализы.csv")
 
 
 def get_address_source():
@@ -192,9 +194,9 @@ def get_addresses():
 
     for address in source.find_all("div", {"class": "medcentres__adress"}):
         if (
-            "г." not in address.text
-            and "Колпино" not in address.text
-            and "Ульяновка" not in address.text
+                "г." not in address.text
+                and "Колпино" not in address.text
+                and "Ульяновка" not in address.text
         ):
             addresses.append(address.text)
             last = address.find_previous("div")
@@ -204,24 +206,57 @@ def get_addresses():
                 metro_stations.append("")
 
     data = [
-        [city, addresses[i], "", phone, metro_stations[i]]
+        [city, addresses[i], "", phone, metro_stations[i], "ООО «Ваша лаборатория»"]
         for i in range(len(addresses))
     ]
 
-    df = pandas.DataFrame(
-        data=data,
-        columns=[
-            "Город",
-            "Адрес",
-            "Часы работы",
-            "Контактный телефон",
-            "Станция метро",
-        ],
-    )
+    # df = pandas.DataFrame(
+    #    data=data,
+    #    columns=[
+    #        "Город",
+    #        "Адрес",
+    #        "Часы работы",
+    #        "Контактный телефон",
+    #        "Станция метро",
+    #    ],
+    # )
 
-    df.to_csv("Адреса.csv")
+    # df.to_csv("Адреса.csv")
+    return data
 
 
-if __name__ == "__main__":
-    get_addresses()
-    get_services()
+async def add_to_db(obj, table_name):
+    if table_name == 'analyzes':
+        # Рассмотрим добавление данных в таблицу анализов схемы dds
+        await db._insert(
+            table=table_name,  # Тут название таблицы (analyzes/addresses)
+            schema='stg',  # Указываем схему
+            Код=obj[3],  # Здесь код анализа
+            Группа=obj[2],  # Группа, к которой относится наши анализы
+            Наименование=obj[1],  # Наименование нашего анализа
+            Стоимость_услуги=obj[4],  # Стоимость услуги
+            Наименование_лаборатории=obj[5],  # Наименование лаборатории
+            Дата=obj[0],  # Дата сбора анализа
+        )
+    elif table_name == 'addresses':
+        await db._insert(
+            table=table_name,  # Тут название таблицы (analyzes/addresses)
+            schema='stg',  # Указываем схему
+            Город=obj[0],
+            Адрес=obj[1],
+            Контактные_номера=obj[3],
+            Часы_работы=obj[2],
+            Станция_метро=obj[4],
+            Наименование_клиники=obj[5]
+        )
+
+
+async def parse():
+    services = get_services()
+    addresses = get_addresses()
+
+    for service in services:
+        await add_to_db(service, 'analyzes')
+
+    for address in addresses:
+        await add_to_db(address, 'addresses')
