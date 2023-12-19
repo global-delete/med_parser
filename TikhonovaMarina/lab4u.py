@@ -1,5 +1,5 @@
 import time
-
+import os
 import pandas
 import requests
 from bs4 import BeautifulSoup
@@ -153,14 +153,14 @@ def get_services():
     # df.to_csv("Анализы.csv")
 
 
-def get_address_source(): #pip3.8 install -r requirements.txt && python3.8 main.py
+def get_address_source():
     url = "https://lab4u.ru/medcenters/"
-    options = webdriver.ChromeOptions()
-    # options.binary_location = "/app/chromedriver.exe"
-    options.add_argument("--headless")
-    options.add_argument("window-size=1400,800")
-    driver = webdriver.Chrome(options=options)
+    # options = webdriver.ChromeOptions()
+    # options.add_argument("--headless")
+    # options.add_argument("window-size=1400,800")
+    # driver = webdriver.Chrome(options=options, executable_path="./chromedriver.exe")
 
+    driver = webdriver.Firefox(executable_path='./geckodriver')
 
     try:
         driver.get(url=url)

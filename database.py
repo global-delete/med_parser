@@ -1,16 +1,26 @@
 import asyncpg
 import asyncio
+import os
 from pandas import DataFrame
 
 from typing import Generator, Coroutine, Any, List
 
-cnfg = {
-    "user": "postgres",
-    "password": "postgres",
-    "database": "postgres",
-    "host": "postgres",
-    "port": "5432",
-}
+if os.name == 'nt':
+    cnfg = {
+        "user": "postgres",
+        "password": "postgres",
+        "database": "postgres",
+        "host": "localhost",
+        "port": "6543",
+    }
+else:
+    cnfg = {
+        "user": "postgres",
+        "password": "postgres",
+        "database": "postgres",
+        "host": "postgres",
+        "port": "5432",
+    }    
 
 
 class Connection:

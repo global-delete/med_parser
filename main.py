@@ -9,10 +9,8 @@ from TikhonovaMarina.lab4u import parse as parser5
 
 async def parsing_1():
     logging.warning("Parser1 - is running")
-    await parser1.parse()
     try:
-        # await parser1.parse()
-        ...
+        await parser1.parse()
     except Exception as err:
         logging.critical(f"Parser1 - error: {err}")
     else:
@@ -22,10 +20,8 @@ async def parsing_1():
 
 async def parsing_2():
     logging.warning("Parser2 - is running")
-    await parser2()
     try:
-        # await parser2()
-        ...
+        await parser2()
     except Exception as err:
         logging.critical(f"Parser2 - error: {err}")
     else:
@@ -35,10 +31,8 @@ async def parsing_2():
 
 async def parsing_3():
     logging.warning("Parser3 - is running")
-    await parser3()
     try:
-        # await parser3()
-        ...
+        await parser3()
     except Exception as err:
         logging.critical(f"Parser3 - error: {err}")
     else:
@@ -48,16 +42,14 @@ async def parsing_3():
 
 async def parsing_4():
     logging.warning("Parser4 - is running")
-    await parser4()
     try:
-        # await parser4()
-        ...
+        await parser4()
     except Exception as err:
         logging.critical(f"Parser4 - error: {err}")
     else:
         logging.warning("Parser4 - Done!")
 
-    await parsing_5()
+    # await parsing_5()
 
 async def parsing_5():
     logging.warning("Parser5 - is running")
