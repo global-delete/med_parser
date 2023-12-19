@@ -24,9 +24,9 @@ class Service:
     def __init__(self, category, title, price, code='', laboratory='INVITRO'):
         self.category = category
         self.title = title
-        self.price = clear_price(price)
+        self.price = str(clear_price(price))
         self.laboratory = laboratory
-        self.code = code
+        self.code = str(code)
         self.date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
 

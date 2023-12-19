@@ -28,8 +28,8 @@ fieldnames_centers: List = [
 
 class Parser:
     __url: str = "https://www.cmd-online.ru"
-    __path_data_analysis = "/KrilovMisha/data/analysis.csv"
-    __path_data_centers = "/KrilovMisha/data/centers.csv"
+    __path_data_analysis = "./KrilovMisha/data/analysis.csv"
+    __path_data_centers = "./KrilovMisha/data/centers.csv"
     __city = "sankt-peterburg"
 
     __headers: dict = {
@@ -163,7 +163,6 @@ class Parser:
 
         for i in self.data[self.__city]["Адреса офисов"]:
             await db._insert(table="addresses", schema="stg", **i)
-
 
 
 parser = Parser()
