@@ -8,38 +8,10 @@ services:
       - POSTGRES_DB=airflow
     ports:
       - "6543:5432"
-  webserver:
-    #network_mode: "host"
-    image: puckel/docker-airflow:1.10.1
-    build:
-      context: https://github.com/puckel/docker-airflow.git#1.10.1
-      dockerfile: Dockerfile
-      args:
-        AIRFLOW_DEPS: gcp_api,s3
-        PYTHON_DEPS: sqlalchemy==1.2.0
-    restart: always
-    depends_on:
-      - postgres
-    environment:
-      - LOAD_EX=n
-      - EXECUTOR=Local
-      - FERNET_KEY=jsDPRErfv8Z_eVTnGfF8ywd19j4pyqE3NpdUBA_oRTo=
+  
+  main:
+    image: python:3.8
     volumes:
-      # - ./examples/intro-example/dags:/usr/local/airflow/dags
-      - .:/usr/local/airflow/dags
-      - .:/usr/local/airflow/requirements.txt
-      - ./airflow-data/includes:/opt/airflow/includes
-      - ./airflow-data/logs:/opt/airflow/logs
-      - ./airflow-data/plugins:/opt/airflow/plugins
-      - ./airflow-data/airflow.cfg:/opt/airflow/airflow.cfg
-      - ./requirements.txt:/requirements.txt
-      # Uncomment to include custom plugins
-      # - ./plugins:/usr/local/airflow/plugins
-    ports:
-      - "8080:8080"
-    command: webserver
-    healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
+      - .:/app
+    working_dir: /app
+    command: python3 main.py

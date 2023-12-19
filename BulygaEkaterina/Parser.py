@@ -2,7 +2,8 @@ from bs4 import BeautifulSoup
 import requests as req
 import pandas as pd
 import time
-from KrilovMisha.database import db
+import asyncio
+from database import db
 
 
 class Address:
@@ -22,11 +23,11 @@ class Category:
 class Service:
     def __init__(self, category, title, price, code='', laboratory='АО "ЛабКвест"'):
         self.date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        self.code = code
+        self.code = str(code)
         self.laboratory = laboratory
         self.category = category
         self.title = title
-        self.price = str_to_int(price)
+        self.price = str(str_to_int(price))
 
 
 def list_to_str(mylist):
@@ -101,7 +102,7 @@ async def add_to_db(obj, table_name):
         table=table_name,  # Тут название таблицы (analyzes/addresses)
         schema='stg',  # Указываем схему
         Код=obj.code,  # Здесь код анализа
-        Группа=obj.category,  # Группа, к которой относится наши анализы
+        Группа=obj.category.title,  # Группа, к которой относится наши анализы
         Наименование=obj.title,  # Наименование нашего анализа
         Стоимость_услуги=obj.price,  # Стоимость услуги
         Наименование_лаборатории=obj.laboratory,  # Наименование лаборатории
@@ -109,9 +110,13 @@ async def add_to_db(obj, table_name):
     )
 
 
-if __name__ == '__main__':
+async def parse():
     services = analysis_data()
-    address_data()
-    loop = asyncio.get_event_loop()
+    # address_data()
+
     for service in services:
-        loop.run_until_complete(add_to_db(service, 'analyzes'))
+        await add_to_db(service, 'analyzes')
+
+    
+    
+        
