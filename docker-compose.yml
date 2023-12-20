@@ -1,0 +1,18 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:9.6
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "6543:5432"
+  
+  main:
+    image: python:3.8
+    volumes:
+      - .:/app
+      - ./requirements.txt:/requirements.txt
+    working_dir: /app
+    command: sh -c "pip3.8 install -r requirements.txt && python3.8 main.py"
