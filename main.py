@@ -6,8 +6,11 @@ from Lyusin_Dmitry.Parsing import parse as parser2
 from BulygaEkaterina.Parser import parse as parser3
 from ShevchenkoSemyon.parser import parse as parser4
 from TikhonovaMarina.lab4u import parse as parser5
+from Lyusin_Dmitry.ETL import etl
+
 
 async def parsing_1():
+
     logging.warning("Parser1 - is running")
     try:
         await parser1.parse()
@@ -16,7 +19,9 @@ async def parsing_1():
     else:
         logging.warning("Parser1 - Done!")
     await parsing_2()
-    asyncio.get_event_loop().call_later(60*60*12, asyncio.ensure_future, parsing_1())
+    asyncio.get_event_loop().call_later(
+        60 * 60 * 12, asyncio.ensure_future, parsing_1()
+    )
 
 async def parsing_2():
     logging.warning("Parser2 - is running")
@@ -29,6 +34,7 @@ async def parsing_2():
 
     await parsing_3()
 
+
 async def parsing_3():
     logging.warning("Parser3 - is running")
     try:
@@ -40,6 +46,7 @@ async def parsing_3():
 
     await parsing_4()
 
+
 async def parsing_4():
     logging.warning("Parser4 - is running")
     try:
@@ -49,18 +56,31 @@ async def parsing_4():
     else:
         logging.warning("Parser4 - Done!")
 
+    await etl_process()
+
     # await parsing_5()
 
-async def parsing_5():
-    logging.warning("Parser5 - is running")
-    await parser5()
+
+# async def parsing_5():
+#     logging.warning("Parser5 - is running")
+#     await parser5()
+#     try:
+#         # await parser5()
+#         ...
+#     except Exception as err:
+#         logging.critical(f"Parser5 - error: {err}")
+#     else:
+#         logging.warning("Parser5 - Done!")
+
+
+async def etl_process():
+    logging.warning("etl - is running")
     try:
-        # await parser5()
-        ...
+        await etl()
     except Exception as err:
-        logging.critical(f"Parser5 - error: {err}")
+        logging.critical(f"etl - error: {err}")
     else:
-        logging.warning("Parser5 - Done!")
+        logging.warning("etl - Done!")
 
 
 asyncio.ensure_future(parsing_1())

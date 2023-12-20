@@ -84,8 +84,8 @@ class DataBase:
                 for j in dict(i):
                     result[j].append(i[j])
             if bool(await connection.fetch(f'SELECT 1 FROM {schema}.{table}')):
-                return DataFrame.from_dict(
-                    data=result, orient='index'
+                return DataFrame(
+                    data=result
                 )
             return DataFrame(data=None, columns=list(result))
 
